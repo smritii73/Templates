@@ -4,10 +4,12 @@ import java.io.*;
 public class Main {
 	public static class SegmentTree {
 		public static long[] tree;
+		public static int size;
 
 		SegmentTree(int size, long[] a) {
 			tree = new long[4 * size];
 			build(1, 0, size - 1, a);
+			this.size = size;
 		}
 
 		public long merge(long num1, long num2) {
@@ -29,7 +31,10 @@ public class Main {
 			tree[x] = merge(tree[2 * x], tree[2 * x + 1]);
 		}
 
-		public void update(int x, int l, int r, int pos, long val) {
+		public void update(int pos,long val) {
+			update_t(1,0,size-1,pos,val);
+		}
+		public void update_t(int x, int l, int r, int pos, long val) {
 			if (l > pos || pos > r)
 				return;
 			if (l == pos && r == pos) {
@@ -37,20 +42,23 @@ public class Main {
 				return;
 			}
 			int mid = l + (r - l) / 2;
-			update(2 * x, l, mid, pos, val);
-			update(2 * x + 1, mid + 1, r, pos, val);
+			update_t(2 * x, l, mid, pos, val);
+			update_t(2 * x + 1, mid + 1, r, pos, val);
 			tree[x] = merge(tree[2 * x], tree[2 * x + 1]);
 		}
 
-		public long query(int x, int l, int r, int tl, int tr) {
+		public long query(int tl,int tr) {
+			return	query_t(1,0,size-1,tl,tr);
+		}
+		public long query_t(int x, int l, int r, int tl, int tr) {
 			if (tl <= l && r <= tr)
 				return tree[x]; // Completely included
 			if (tr < l || r < tl)
 				return base(); // Completely excluded
 			// rest handle partially included cases
 			int mid = l + (r - l) / 2;
-			long a = query(2 * x, l, mid, tl, tr);
-			long b = query(2 * x + 1, mid + 1, r, tl, tr);
+			long a = query_t(2 * x, l, mid, tl, tr);
+			long b = query_t(2 * x + 1, mid + 1, r, tl, tr);
 			return merge(a, b);
 		}
 	}
@@ -70,11 +78,11 @@ public class Main {
 			if (type == 1) {
 				int ind = sc.nextInt();
 				long val = sc.nextLong();
-				tree.update(1, 0, n - 1, ind, val);
+				tree.update(ind, val);
 			} else {
 				int l = sc.nextInt();
 				int r = sc.nextInt() - 1;
-				out.println(tree.query(1, 0, n - 1, l, r));
+				out.println(tree.query(l, r));
 			}
 		}
 		out.flush();
@@ -86,4 +94,3 @@ public class Main {
 // r
 // ...tl....tr....l.....r -> Competely excluded returns 0
 // ...l ....r.....tl....tr -> Competely excluded returns 0
-//
